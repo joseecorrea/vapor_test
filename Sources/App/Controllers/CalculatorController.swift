@@ -27,33 +27,25 @@ struct CalculatorController: RouteCollection {
     }
     
     func operate(operation: Operations, req: Request) async throws -> Int {
-        let numbers: [String] = req.parameters.getCatchall()
-        var returnValue: Int?
-        try numbers.forEach { num in
-            guard let num = Int(num) else {
-                throw Abort(.badRequest)
+        var numbers: [String] = req.parameters.getCatchall()
+        guard let firstValue = numbers.first, let firstValue = Int(firstValue) else { throw Abort(.badRequest) }
+        numbers.removeFirst()
+        let total = try numbers.reduce(firstValue, {
+            guard let num2 = Int($1) else { throw Abort(.badRequest) }
+            switch operation {
+            case Operations.Addition:
+                return $0 + num2
+            case Operations.Substraction:
+                return $0 - num2
+            case Operations.Multiplication:
+                return $0 * num2
+            case Operations.Division:
+                return $0 / num2
+            default:
+                return 0
             }
-            if returnValue != nil{
-                switch operation {
-                case Operations.Addition:
-                    returnValue! += num
-                case Operations.Substraction:
-                    returnValue! -= num
-                case Operations.Multiplication:
-                    returnValue! *= num
-                case Operations.Division:
-                    returnValue! /= num
-                default:
-                    break
-                }
-            } else {
-                returnValue = num
-            }
-        }
-        guard let returnValue else {
-            throw Abort(.internalServerError)
-        }
-        return returnValue
+        } )
+        return total
     }
     
     func addition(req: Request) async throws -> Int {
