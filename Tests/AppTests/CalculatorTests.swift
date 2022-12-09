@@ -8,19 +8,31 @@
 @testable import App
 import XCTVapor
 
-extension AppTests {
-    func testAddition() throws {
-        let app = Application(.testing)
-        defer { app.shutdown() }
-        try configure(app)
+final class CalculatorTests: XCTestCase {
+    
+    var app: Application?
+    var capturingViewRender: CalculatorViewRenderer?
 
+    override func setUpWithError() throws {
+        app = Application(.testing)
+        guard let app else { return }
+        try configure(app)
+        capturingViewRender = CalculatorViewRenderer(eventLoop: app.eventLoopGroup.next())
+        guard let capturingViewRender else { return }
+        app.views.use { _ in capturingViewRender }
+    }
+
+    func testAddition() throws {
+        guard let app else { return }
         try app.test(.GET, "addition/8/2", afterResponse: { res in
+            guard let context = capturingViewRender?.capturedContext as? CalculatorContext else { return }
             XCTAssertEqual(res.status, .ok)
-            XCTAssertEqual(res.body.string, "10")
+            XCTAssertEqual(context.returnValue, "10")
         })
         try app.test(.GET, "addition/8/2", afterResponse: { res in
+            guard let context = capturingViewRender?.capturedContext as? CalculatorContext else { return }
             XCTAssertEqual(res.status, .ok)
-            XCTAssertNotEqual(res.body.string, "6")
+            XCTAssertNotEqual(context.returnValue, "6")
         })
         try app.test(.GET, "addition/hola", afterResponse: { res in
             XCTAssertEqual(res.status, .badRequest)
@@ -31,17 +43,15 @@ extension AppTests {
     }
     
     func testSubstraction() throws {
-        let app = Application(.testing)
-        defer { app.shutdown() }
-        try configure(app)
-
+        guard let app else { return }
+        guard let context = capturingViewRender?.capturedContext as? CalculatorContext else { return }
         try app.test(.GET, "subtraction/8/2", afterResponse: { res in
             XCTAssertEqual(res.status, .ok)
-            XCTAssertEqual(res.body.string, "6")
+            XCTAssertEqual(context.returnValue, "6")
         })
         try app.test(.GET, "subtraction/8/2", afterResponse: { res in
             XCTAssertEqual(res.status, .ok)
-            XCTAssertNotEqual(res.body.string, "10")
+            XCTAssertNotEqual(context.returnValue, "10")
         })
         try app.test(.GET, "subtraction/hola", afterResponse: { res in
             XCTAssertEqual(res.status, .badRequest)
@@ -52,17 +62,15 @@ extension AppTests {
     }
     
     func testMultiplication() throws {
-        let app = Application(.testing)
-        defer { app.shutdown() }
-        try configure(app)
-
+        guard let app else { return }
+        guard let context = capturingViewRender?.capturedContext as? CalculatorContext else { return }
         try app.test(.GET, "multiplication/8/2", afterResponse: { res in
             XCTAssertEqual(res.status, .ok)
-            XCTAssertEqual(res.body.string, "16")
+            XCTAssertEqual(context.returnValue, "16")
         })
         try app.test(.GET, "multiplication/8/2", afterResponse: { res in
             XCTAssertEqual(res.status, .ok)
-            XCTAssertNotEqual(res.body.string, "10")
+            XCTAssertNotEqual(context.returnValue, "10")
         })
         try app.test(.GET, "multiplication/hola", afterResponse: { res in
             XCTAssertEqual(res.status, .badRequest)
@@ -73,17 +81,15 @@ extension AppTests {
     }
     
     func testDivision() throws {
-        let app = Application(.testing)
-        defer { app.shutdown() }
-        try configure(app)
-
+        guard let app else { return }
+        guard let context = capturingViewRender?.capturedContext as? CalculatorContext else { return }
         try app.test(.GET, "division/8/2", afterResponse: { res in
             XCTAssertEqual(res.status, .ok)
-            XCTAssertEqual(res.body.string, "4")
+            XCTAssertEqual(context.returnValue, "4")
         })
         try app.test(.GET, "division/8/2", afterResponse: { res in
             XCTAssertEqual(res.status, .ok)
-            XCTAssertNotEqual(res.body.string, "10")
+            XCTAssertNotEqual(context.returnValue, "10")
         })
         try app.test(.GET, "division/hola", afterResponse: { res in
             XCTAssertEqual(res.status, .badRequest)
