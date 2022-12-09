@@ -26,7 +26,7 @@ struct CalculatorController: RouteCollection {
         }
     }
     
-    func operate(operation: Operations, req: Request) async throws -> Int {
+    func operate(operation: Operations, req: Request) async throws -> View {
         var numbers: [String] = req.parameters.getCatchall()
         guard let firstValue = numbers.first, let firstValue = Int(firstValue) else { throw Abort(.badRequest) }
         numbers.removeFirst()
@@ -45,22 +45,22 @@ struct CalculatorController: RouteCollection {
                 return 0
             }
         } )
-        return total
+        return try await req.view.render("Calculator", CalculatorContext(returnValue: String(total), operation: operation.rawValue))
     }
     
-    func addition(req: Request) async throws -> Int {
+    func addition(req: Request) async throws -> View {
         try await operate(operation: .Addition, req: req)
     }
     
-    func subtraction(req: Request) async throws -> Int {
+    func subtraction(req: Request) async throws -> View {
         try await operate(operation: .Substraction, req: req)
     }
     
-    func multiplication(req: Request) async throws -> Int {
+    func multiplication(req: Request) async throws -> View {
         try await operate(operation: .Multiplication, req: req)
     }
     
-    func division(req: Request) async throws -> Int {
+    func division(req: Request) async throws -> View {
         try await operate(operation: .Division, req: req)
     }
     
@@ -70,4 +70,9 @@ struct CalculatorController: RouteCollection {
         }
         return number.squareRoot()
     }
+}
+
+struct CalculatorContext: Encodable {
+    let returnValue: String
+    let operation: String
 }
