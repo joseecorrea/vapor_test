@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum Operations {
+enum Operations: String, Codable {
     case Addition
     case Substraction
     case Multiplication
