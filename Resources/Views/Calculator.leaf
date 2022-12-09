@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<!-- 1 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <!-- 2 -->
+  <title>#(operation)</title>
+</head>
+<body>
+  <h1>#(returnValue)</h1>
+</body>
+</html>
